@@ -17,6 +17,7 @@ This room is all about MD5 collision.
 
 ## Enumeration:
 Rustscan:
+```
 └─$ rustscan -a 10.66.xx.xx -- -A -sV 
 Nmap? More like slowmap.🐢
 
@@ -43,6 +44,7 @@ upload               (Status: 405) [Size: 153]
 static               (Status: 403) [Size: 146]
 Progress: 498248 / 498248 (100.00%)
 Finished
+```
 
 ## Decision time
 Nginx and OpenSSH are both up to date with no current exploitable vulnerabilities. We see an /upload and a /static folder, so let's explore the application.
@@ -64,11 +66,11 @@ My first thought at this point was to get an MD5 rainbow table and convert the v
 ## Getting closer...
 The featured dog image was available at /view/\<UUID>. As a test, I took the UUID I was given for my image and it was available in that directory. So, we have confirmed that there is no pseudo-shenanigans going on here. There really is some kind of UUID matching going on.
 
-This is where I hit a wall. I tried to enumerate the /view/ directory. I tried a python script that took the UUID of the featured image and get a true MD5 sum from it, then tried matching it to short number strings or common words (flag, password, user, letmein, rockyou...)
+This is where I hit a wall. I tried to enumerate the /view/ directory. I tried re-uploading the featured image. I tried a python script that took the UUID of the featured image and get a true MD5 sum from it, then tried matching it to short number strings or common words (flag, password, user, letmein, rockyou...)
 
 Nope, not those.
 
-I took a step back and caffeinated a little. COLLISION of the heart. COLLISION...md5 collision!
+I took a step back and caffeinated a little. COLLISION of the heart. COLLISION...md5 collisions!
 ## The solution!
 Not going to go super deep into md5 collisions. The short version is md5 is flawed and you can get the same hash value for two different files. Learn to your heart's content here: https://marc-stevens.nl/research/hashclash/
 
@@ -78,6 +80,7 @@ Next, I downloaded the featured dog image (it's available to view, so we are sur
 
 Now to make stars collide!
 
+```
 └─$ ./md5collgen -p 00795a8b-fb58-47c0-xxxx-af068ddc71b4.jpg -o collision1.bin collision2.bin
 
 Using output filenames: 'collision1.bin' and 'collision2.bin'
@@ -87,6 +90,7 @@ Using initial value: d952c4dc451491468eae6178905xxxx
 Generating first block: ....
 Generating second block: W........................
 Running time: 0.894659 s
+```
 
 Once this finished, I went back to the upload and presented collision1.bin. It accepted the file, but no match.
 
